@@ -186,7 +186,6 @@ footer{max-width:1360px;margin:0 auto;padding:0 20px 30px;font-size:12px;color:v
   <div class="filters" id="filters">
     <div class="f"><span>Aportante</span><div class="seg" id="fGrupo"></div></div>
     <div class="f"><span>Año</span><div class="seg alt" id="fAnio"></div></div>
-    <div class="f"><span>Inversión</span><div class="seg alt" id="fTipo"></div></div>
     <div class="f"><select id="fZona" aria-label="Zona"></select><select id="fMun" aria-label="Municipio"></select></div>
     <button class="reset" id="reset"><i data-lucide="rotate-ccw"></i>Restablecer</button>
   </div>
@@ -223,9 +222,8 @@ footer{max-width:1360px;margin:0 auto;padding:0 20px 30px;font-size:12px;color:v
     <div class="card"><h2>Mapa de la inversión</h2><p class="sub">Toque una porción para ver el detalle de línea → componente</p><div class="ch-l" id="cSun"></div></div>
     <div class="card"><h2>Municipios con mayor inversión</h2><p class="sub">Valores completos en pesos</p><div class="ch-l" id="cMunInv"></div></div>
   </div>
-  <div class="g g3">
+  <div class="g g2">
     <div class="card"><h2>Por zona de Caldas</h2><p class="sub">Distribución territorial</p><div class="ch-s" id="cZona"></div></div>
-    <div class="card"><h2>Convenio y adicional</h2><p class="sub">Recursos del convenio y adiciones</p><div class="ch-s" id="cTipo"></div></div>
     <div class="card"><h2>Por línea y año</h2><p class="sub">Comparación entre años</p><div class="ch-s" id="cLinAnio"></div></div>
   </div>
 </section>
@@ -362,10 +360,8 @@ function drawControls(){
   $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;history.replaceState(null,'','#'+S.tab);render();window.scrollTo({top:0,behavior:RM?'auto':'smooth'})});
   seg('fGrupo',['CHEC','Otros aliados','Toda la alianza'].map(x=>[x,x]),v=>S.grupo===v,v=>S.grupo=v);
   seg('fAnio',[...ANIOS.map(a=>[a,a]),['T','Todos']],v=>v==='T'?S.anios.length===ANIOS.length:S.anios.length===1&&S.anios[0]===v,v=>S.anios=v==='T'?[...ANIOS]:[v]);
-  seg('fTipo',[['Convenio','Convenio'],['Adicional al convenio','Adicional'],['Todo','Convenio + adicional']],v=>S.tipo===v,v=>S.tipo=v);
   $('fZona').innerHTML='<option value="">Todas las zonas</option>'+Object.keys(ZONAS).sort().map(z=>`<option ${z===S.zona?'selected':''}>${z}</option>`).join('');
   $('fMun').innerHTML='<option value="">Todos los municipios</option>'+MUNIS.filter(m=>!S.zona||ZONAS[S.zona].includes(m)).map(m=>`<option ${m===S.mun?'selected':''}>${m}</option>`).join('');
-  $('fTipo').parentElement.style.display=S.tab==='estudiantes'?'none':'';
   const off=S.tab==='avance';
   $('filters').classList.toggle('off',off);
   const note=off?'Esta pestaña muestra el plan de metas 2026 del convenio CHEC; los filtros no aplican.':S.tab==='alianza'?'Esta pestaña muestra a todos los aliados; el filtro de aportante no aplica.':'';
@@ -393,7 +389,7 @@ function bindMapClick(id){const c=chart(id);c.off('click');c.on('click',p=>{S.mu
 // ---------- RESUMEN
 function drawResumen(){
   const inv=fInv(),est=fEst(),tot=sum(inv,'valor');
-  $('hLbl').textContent=`Inversión ${grupoTxt()} · ${S.tipo==='Todo'?'convenio + adicional':S.tipo==='Convenio'?'convenio':'adicional al convenio'}`;
+  $('hLbl').textContent=`Inversión ${grupoTxt()} · convenio`;
   countTo(document.querySelector('[data-n=hTotal]'),tot,COP);
   $('hCtx').textContent=`${lugarTxt()} · ${aniosTxt()}`;
   countTo(document.querySelector('[data-n=hMun]'),new Set(inv.map(r=>r.m)).size,N);
@@ -444,7 +440,7 @@ const barH=(id,rows,color,fmt=COP,opt={})=>{if(opt.fit)$(id).style.height=Math.m
 function drawInversion(){
   const inv=fInv(),tot=sum(inv,'valor');
   kpis('kInv',[['wallet',tot,'Inversión '+grupoTxt(),COP],['layers',sum(inv.filter(r=>r.tipo==='Convenio'),'valor'),'Recursos del convenio',COP],
-    ['plus-circle',sum(inv.filter(r=>r.tipo!=='Convenio'),'valor'),'Adicional al convenio',COP],['map-pin',new Set(inv.map(r=>r.m)).size,'Municipios con inversión']]);
+    ['map-pin',new Set(inv.map(r=>r.m)).size,'Municipios con inversión']]);
   // sunburst línea > componente > actividad
   const tree=LINEAS.map(l=>{const rl=inv.filter(r=>r.linea===l);return{name:l,itemStyle:{color:LCOL[l]},children:COMPS[l].map(c=>{const rc=rl.filter(r=>r.comp===c);
     return{name:c,value:sum(rc,'valor'),itemStyle:{color:LCOL[l]}}}).filter(c=>c.value>0)}}).filter(l=>l.children.length);
@@ -458,10 +454,6 @@ function drawInversion(){
   setOpt('cZona',{tooltip:{formatter:p=>`<b>${p.name}</b><br>${COP(p.value)} · ${pct(p.percent)}`},legend:{bottom:0,icon:'circle'},
     series:[{type:'pie',radius:['48%','74%'],center:['50%','44%'],itemStyle:{borderColor:'#fff',borderWidth:3,borderRadius:6},label:{formatter:p=>pct(p.percent),fontWeight:800},
       data:z.map(([k,v],i)=>({name:k,value:v,itemStyle:{color:[C.verde,C.lima,C.teal,'#e2a33a'][i%4]}}))}]});
-  const tAll=ent(by(D.inv.filter(r=>okGrupo(r)&&S.anios.includes(r.a)&&okLugar(r)),'tipo','valor'));
-  setOpt('cTipo',{tooltip:{formatter:p=>`<b>${p.name}</b><br>${COP(p.value)} · ${pct(p.percent)}`},legend:{bottom:0,icon:'circle'},
-    series:[{type:'pie',radius:['48%','74%'],center:['50%','44%'],itemStyle:{borderColor:'#fff',borderWidth:3,borderRadius:6},label:{formatter:p=>pct(p.percent),fontWeight:800},
-      data:tAll.map(([k,v])=>({name:k,value:v,itemStyle:{color:k==='Convenio'?C.verde:'#e2a33a'}}))}]});
   const la=fInv({ignA:true});
   setOpt('cLinAnio',{legend:{bottom:0,icon:'roundRect',itemWidth:10,itemHeight:10,textStyle:{fontSize:11}},grid:{left:6,right:6,top:10,bottom:40,containLabel:true},
     tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:COP},
