@@ -62,7 +62,7 @@ main{max-width:1360px;margin:0 auto;padding:18px 20px 40px}
 .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .g-5-7{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
 .g-7-5{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
-.ch{height:320px}.ch-s{height:260px}.ch-l{height:420px}.map{height:480px}.map-l{height:620px}
+.ch{height:320px}.ch-s{height:260px}.ch-l{height:420px}.map{height:540px}.map-l{height:620px}
 /* hero */
 .hero{background:linear-gradient(120deg,var(--verde-osc) 0%,var(--verde) 55%,#3fa52a 100%);color:#fff;border-radius:22px;padding:26px 28px;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:0 18px 40px -22px rgba(0,80,20,.8)}
 .hero:after{content:"";position:absolute;right:-80px;top:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(139,194,27,.55),transparent 65%)}
@@ -319,7 +319,7 @@ const TT={backgroundColor:'#fff',borderColor:'#e2e8dc',textStyle:{color:'#16261b
 const BASE={textStyle:{fontFamily:FONT},animationDuration:RM?0:900,animationEasing:'cubicOut',tooltip:{...TT}};
 
 // ---------- estado
-const TABS=[['resumen','Resumen','layout-dashboard'],['inversion','Inversión','wallet'],['avance','Avance 2026','target'],['estudiantes','Estudiantes','graduation-cap'],['territorio','Territorio','map']];  // pestaña 'alianza' desactivada por ahora: para volver a mostrarla, agregar ['alianza','Alianza','handshake']
+const TABS=[['resumen','Resumen','layout-dashboard'],['inversion','Inversión','wallet'],['avance','Avance 2026','target'],['estudiantes','Técnicos','graduation-cap'],['territorio','Territorio','map']];  // pestaña 'alianza' desactivada por ahora: para volver a mostrarla, agregar ['alianza','Alianza','handshake']
 const DEF=()=>({tab:S?.tab||'resumen',grupo:'CHEC',anios:[2026],tipo:'Convenio',zona:'',mun:'',metric:'valor'});
 let S=null; S=DEF();
 let D, ANIOS, MUNIS, ZONAS={};
@@ -375,16 +375,17 @@ function drawControls(){
 
 // ---------- mapa
 function mapOpt(vals,fmt,big){
-  const mx=Math.max(1,...Object.values(vals));
+  const mx=Math.max(1,...Object.values(vals)),sq=Math.sqrt;  // raíz cuadrada: un municipio grande no apaga el color de los demás
+  const top=new Set(Object.entries(vals).sort((a,b)=>b[1]-a[1]).slice(0,big?27:10).filter(x=>x[1]>0).map(x=>x[0]));
   return {
     tooltip:{trigger:'item',formatter:p=>`<b>${p.name}</b><br>${vals[p.name]?fmt(vals[p.name]):'Sin registros'}<br><span style="color:#66706a;font-size:11px">Zona ${MUNZ[p.name]||''}</span>`},
-    visualMap:{min:0,max:mx,left:10,bottom:10,itemHeight:big?140:100,calculable:false,text:['Más','Menos'],textStyle:{color:'#66706a',fontSize:11},inRange:{color:['#eef5e4','#c9e39a','#8BC21B','#2f9a35','#006b1e','#0b3d1e']},outOfRange:{color:'#f1f1ee'},formatter:v=>''},
-    series:[{type:'map',map:'caldas',nameProperty:'m',roam:big,scaleLimit:{min:1,max:6},layoutCenter:['50%','50%'],layoutSize:'104%',selectedMode:'single',
-      label:{show:big,fontSize:11,fontWeight:600,color:'#16261b',textBorderColor:'rgba(255,255,255,.85)',textBorderWidth:2},
-      itemStyle:{borderColor:'#fff',borderWidth:1,areaColor:'#f1f1ee'},
+    visualMap:{min:0,max:sq(mx),left:10,bottom:10,itemWidth:16,itemHeight:big?170:130,calculable:false,text:[fmt(mx),'0'],textStyle:{color:'#3c4640',fontSize:11,fontWeight:700},inRange:{color:['#e3f0cf','#bfe07a','#7dbd1c','#2f9a35','#00761f','#0b3d1e']},outOfRange:{color:'#e9ebe4'},formatter:v=>''},
+    series:[{type:'map',map:'caldas',nameProperty:'m',roam:big,scaleLimit:{min:1,max:6},layoutCenter:['50%','50%'],layoutSize:'100%',selectedMode:'single',
+      label:{show:false,fontSize:big?11:10.5,fontWeight:700,color:'#16261b',textBorderColor:'rgba(255,255,255,.9)',textBorderWidth:2.5},
+      itemStyle:{borderColor:'#fff',borderWidth:1.2,areaColor:'#e9ebe4',shadowColor:'rgba(11,61,30,.25)',shadowBlur:6,shadowOffsetY:2},
       emphasis:{label:{show:true,fontWeight:800,fontSize:11,color:'#16261b',textBorderColor:'#fff',textBorderWidth:3},itemStyle:{areaColor:'#ffd84d',borderColor:'#0b3d1e',borderWidth:1.5}},
       select:{label:{show:true,fontWeight:800,fontSize:11,color:'#16261b',textBorderColor:'#fff',textBorderWidth:3},itemStyle:{areaColor:'#ffbf3c',borderColor:'#0b3d1e',borderWidth:2}},
-      data:MUNIS.map(m=>({name:m,value:vals[m]||0,selected:m===S.mun}))}]
+      data:MUNIS.map(m=>({name:m,value:sq(vals[m]||0),selected:m===S.mun,label:{show:big||top.has(m)}}))}]
   };
 }
 function bindMapClick(id){const c=chart(id);c.off('click');c.on('click',p=>{S.mun=S.mun===p.name?'':p.name;if(S.mun)S.zona='';render()})}
