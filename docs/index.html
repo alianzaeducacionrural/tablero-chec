@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tablero Convenio CHEC</title>
+<meta name="description" content="Inversión del convenio CHEC – Comité de Cafeteros de Caldas en el Programa de Educación para la Competitividad">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png"><link rel="apple-touch-icon" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800;6..12,900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lima:#8BC21B;--verde:#008024;--verde-2:#006b1e;--verde-osc:#0b3d1e;--gris:#747378;
+  --bg:#f3f6ef;--card:#fff;--ink:#16261b;--mut:#66706a;--line:#e2e8dc;--soft:#eef5e4;
+  --l1:#8BC21B;--l2:#008024;--l3:#1b8a8f;--otros:#d29b3b;--danger:#c4472f;--info:#2f7fb5;
+  --r:16px;--sh:0 1px 2px rgba(16,40,20,.05),0 8px 24px -12px rgba(16,40,20,.18);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Nunito Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+button,select{font:inherit;color:inherit}
+/* encabezado */
+.top{background:#fff;border-bottom:1px solid var(--line)}
+.top-in{max-width:1360px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.top img{height:44px}
+.top .sep{width:1px;height:40px;background:var(--line)}
+.top h1{margin:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
+.top p{margin:0;color:var(--mut);font-size:13px}
+.top .src{margin-left:auto;font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--lima);box-shadow:0 0 0 3px rgba(139,194,27,.25)}
+/* pestañas + filtros */
+.bar{position:sticky;top:0;z-index:50;background:rgba(243,246,239,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1360px;margin:0 auto;padding:10px 20px}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:8px}
+.tabs button{border:0;background:transparent;padding:9px 16px;border-radius:999px;font-weight:700;color:var(--mut);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;transition:background .2s,color .2s}
+.tabs button svg{width:17px;height:17px}
+.tabs button:hover{background:#fff;color:var(--ink)}
+.tabs button[aria-selected=true]{background:var(--verde);color:#fff;box-shadow:0 4px 14px -6px rgba(0,128,36,.7)}
+.filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.f{display:flex;align-items:center;gap:8px}
+.f>span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);font-weight:700}
+.seg{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:5px 12px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--mut);transition:all .2s}
+.seg button.on{background:var(--verde);color:#fff}
+.seg.alt button.on{background:var(--lima);color:var(--verde-osc)}
+select{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer;max-width:200px}
+.reset{border:0;background:transparent;color:var(--verde);font-weight:700;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:5px}
+.reset svg{width:15px;height:15px}
+.filters.off{opacity:.38;pointer-events:none}
+.fnote{font-size:12.5px;color:var(--mut);display:none;margin-top:6px}
+.fnote.show{display:block}
+/* layout */
+main{max-width:1360px;margin:0 auto;padding:18px 20px 40px}
+.panel{display:none;animation:in .45s cubic-bezier(.2,.7,.2,1)}
+.panel.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh);min-width:0}
+.card h2{margin:0 0 2px;font-size:15.5px;font-weight:800}
+.card .sub{margin:0 0 12px;font-size:12.5px;color:var(--mut)}
+.g{display:grid;gap:16px;margin-bottom:16px}
+.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-5-7{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}
+.g-7-5{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.ch{height:320px}.ch-s{height:260px}.ch-l{height:420px}.map{height:480px}.map-l{height:620px}
+/* hero */
+.hero{background:linear-gradient(120deg,var(--verde-osc) 0%,var(--verde) 55%,#3fa52a 100%);color:#fff;border-radius:22px;padding:26px 28px;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:0 18px 40px -22px rgba(0,80,20,.8)}
+.hero:after{content:"";position:absolute;right:-80px;top:-120px;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(139,194,27,.55),transparent 65%)}
+.hero .lbl{font-size:13px;text-transform:uppercase;letter-spacing:.09em;opacity:.85;font-weight:700}
+.hero .big{font-size:clamp(34px,5vw,54px);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin:4px 0 6px}
+.hero .ctx{opacity:.85;font-size:14px}
+.hero-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px;position:relative;z-index:1}
+.hk{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:12px 14px}
+.hk b{display:block;font-size:24px;font-weight:900;letter-spacing:-.02em}
+.hk span{font-size:12.5px;opacity:.9}
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:16px}
+.kpi{display:flex;gap:12px;align-items:flex-start}
+.kpi .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--soft);color:var(--verde)}
+.kpi .ic svg{width:21px;height:21px}
+.kpi b{display:block;font-size:22px;font-weight:900;letter-spacing:-.02em;line-height:1.15;word-break:break-word}
+.kpi span{font-size:12.5px;color:var(--mut)}
+/* estructura por línea */
+.lineas{display:grid;gap:12px}
+.linea{border:1px solid var(--line);border-radius:14px;padding:14px 16px;border-left:6px solid var(--c)}
+.linea-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.linea-h strong{font-size:14.5px}
+.linea-h b{font-size:18px;font-weight:900;color:var(--c2,var(--ink))}
+.linea-h em{font-style:normal;font-size:12px;color:var(--mut);margin-left:6px}
+.comp{margin-top:9px}
+.comp-h{display:flex;justify-content:space-between;font-size:13px;gap:10px}
+.comp-h span:last-child{font-weight:700}
+.track{height:8px;border-radius:99px;background:#eef1ea;overflow:hidden;margin-top:4px}
+.track i{display:block;height:100%;border-radius:99px;background:var(--c);width:0;transition:width .9s cubic-bezier(.2,.7,.2,1)}
+.comp.subc{padding-left:14px;font-size:12.5px}
+.comp.subc .comp-h{color:var(--mut)}
+.comp.subc .track{height:5px}
+/* logros */
+.logros{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.logro{background:var(--soft);border-radius:14px;padding:14px;display:flex;gap:12px;align-items:center}
+.logro .ic{width:42px;height:42px;border-radius:12px;background:#fff;display:grid;place-items:center;color:var(--verde);flex:none}
+.logro .ic svg{width:22px;height:22px}
+.logro b{display:block;font-size:22px;font-weight:900;color:var(--verde-2)}
+.logro span{font-size:12.5px;color:var(--mut);line-height:1.25;display:block}
+/* tablas */
+.tbl-wrap{overflow:auto;max-height:560px;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+thead th{position:sticky;top:0;background:#f7faf3;color:var(--mut);font-weight:700;cursor:pointer;z-index:1}
+tbody tr{cursor:pointer;transition:background .15s}
+tbody tr:hover{background:#f6faef}
+tbody tr.sel{background:#e6f3d3}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:700}
+.p-ok{background:#e1f2d0;color:#2c6a0b}.p-pend{background:#fff0d6;color:#8a5a00}.p-no{background:#f1f1f1;color:#666}
+.bar-cell{min-width:140px}
+.bar-cell .track{margin:0;height:9px}
+.mini{font-size:11.5px;color:var(--mut)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--verde)}
+.btn svg{width:15px;height:15px}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+/* ficha municipio */
+.ficha h3{margin:0;font-size:24px;font-weight:900}
+.ficha .z{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;color:var(--verde);background:var(--soft);padding:3px 10px;border-radius:99px}
+.ficha .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.ficha .row div{background:#f7faf3;border-radius:12px;padding:10px 12px}
+.ficha .row b{display:block;font-size:17px;font-weight:900}
+.ficha .row span{font-size:12px;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{background:#fff;border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px}
+.empty{color:var(--mut);font-size:13.5px;padding:30px 10px;text-align:center}
+.note{font-size:12px;color:var(--mut);margin-top:6px}
+footer{max-width:1360px;margin:0 auto;padding:0 20px 30px;font-size:12px;color:var(--mut)}
+@media (max-width:1100px){.g-5-7,.g-7-5,.g2{grid-template-columns:minmax(0,1fr)}.g3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.logros{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){
+  .top-in,.bar-in,main,footer{padding-left:16px;padding-right:16px}
+  .top .sep,.top .src{display:none}.top img{height:34px}.top h1{font-size:16px}
+  .g3,.logros{grid-template-columns:minmax(0,1fr)}
+  .hero{padding:20px}.hero-k{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .map,.map-l{height:340px}.ch-l{height:360px}
+  .bar{position:static}
+  .f{flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* pantalla de carga */
+#loader{position:fixed;inset:0;z-index:1000;background:linear-gradient(160deg,#fff 0%,#f3f6ef 60%,#e4f0cf 100%);display:grid;place-items:center;transition:opacity .5s ease,visibility .5s}
+#loader.out{opacity:0;visibility:hidden}
+.ld{width:min(360px,86vw);text-align:center}
+.ld img{width:200px;max-width:70%;animation:breathe 2s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.05);opacity:1}}
+.ld h2{margin:18px 0 4px;font-size:17px;font-weight:800}
+.ld p{margin:0 0 18px;font-size:13px;color:var(--mut)}
+.ld-bar{height:8px;border-radius:99px;background:#dfe8d3;overflow:hidden}
+.ld-bar i{display:block;height:100%;width:6%;border-radius:99px;background:linear-gradient(90deg,var(--lima),var(--verde));transition:width .6s cubic-bezier(.2,.7,.2,1);position:relative;overflow:hidden}
+.ld-bar i:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:shine 1.3s infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.ld ul{list-style:none;margin:18px auto 0;padding:0;display:inline-block;text-align:left;font-size:13.5px}
+.ld li{display:flex;align-items:center;gap:10px;padding:4px 0;color:var(--mut);transition:color .3s}
+.ld li:before{content:"";width:16px;height:16px;border-radius:50%;border:2px solid #cfd8c8;flex:none;transition:all .3s}
+.ld li.act{color:var(--ink);font-weight:700}
+.ld li.act:before{border-color:var(--lima);border-top-color:var(--verde);animation:spin .8s linear infinite}
+.ld li.ok{color:var(--verde)}
+.ld li.ok:before{border:0;background:var(--verde) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.5l2.2 2.2 4.8-5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px}
+.ld.err li.act:before{animation:none;border-color:var(--danger)}
+.ld .msg{margin-top:14px;font-size:13px;color:var(--danger)}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="loader" role="status" aria-live="polite"><div class="ld" id="ld">
+  <img src="logo-chec.png" alt="CHEC Grupo EPM">
+  <h2>Preparando el tablero</h2><p>Convenio CHEC · Comité de Cafeteros de Caldas</p>
+  <div class="ld-bar"><i id="ldBar"></i></div>
+  <ul id="ldSteps"><li data-s="lib" class="act">Cargando herramientas</li><li data-s="data">Leyendo la inversión y los estudiantes</li><li data-s="map">Dibujando el mapa de Caldas</li><li data-s="draw">Armando los gráficos</li></ul>
+  <div class="msg" id="ldMsg"></div>
+</div></div>
+<header class="top"><div class="top-in">
+  <img src="logo-chec.png" alt="CHEC Grupo EPM">
+  <div class="sep"></div>
+  <div><h1>Convenio CHEC · Comité de Cafeteros de Caldas</h1><p>Programa de Educación para la Competitividad · Caldas</p></div>
+  <div class="src"><span class="dot"></span><span id="src">Cargando datos…</span></div>
+</div></header>
+
+<div class="bar"><div class="bar-in">
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <div class="filters" id="filters">
+    <div class="f"><span>Aportante</span><div class="seg" id="fGrupo"></div></div>
+    <div class="f"><span>Año</span><div class="seg alt" id="fAnio"></div></div>
+    <div class="f"><span>Inversión</span><div class="seg alt" id="fTipo"></div></div>
+    <div class="f"><select id="fZona" aria-label="Zona"></select><select id="fMun" aria-label="Municipio"></select></div>
+    <button class="reset" id="reset"><i data-lucide="rotate-ccw"></i>Restablecer</button>
+  </div>
+  <div class="fnote" id="fnote"></div>
+</div></div>
+
+<main>
+<!-- RESUMEN -->
+<section class="panel" id="p-resumen">
+  <div class="hero">
+    <div class="lbl" id="hLbl">Inversión CHEC</div>
+    <div class="big" data-n="hTotal">$0</div>
+    <div class="ctx" id="hCtx"></div>
+    <div class="hero-k">
+      <div class="hk"><b data-n="hMun">0</b><span>municipios de Caldas</span></div>
+      <div class="hk"><b data-n="hIE">0</b><span>instituciones educativas</span></div>
+      <div class="hk"><b data-n="hEst">0</b><span>estudiantes técnicos</span></div>
+    </div>
+  </div>
+  <div class="g g-7-5">
+    <div class="card"><h2>¿Dónde se invierte?</h2><p class="sub">Clic en un municipio para filtrar todo el tablero</p><div class="map" id="mapRes"></div></div>
+    <div class="card"><h2>Estructura de la inversión</h2><p class="sub">Por línea y componente del programa</p><div class="lineas" id="lineas"></div></div>
+  </div>
+  <div class="g g-7-5">
+    <div class="card"><h2>Evolución de la inversión</h2><p class="sub">Por año y línea · los años no seleccionados aparecen atenuados</p><div class="ch" id="cEvol"></div></div>
+    <div class="card"><h2>Lo que se logró</h2><p class="sub">Resultados según el registro de actividades</p><div class="logros" id="logros"></div></div>
+  </div>
+</section>
+
+<!-- INVERSIÓN -->
+<section class="panel" id="p-inversion">
+  <div class="kpis" id="kInv"></div>
+  <div class="g g-5-7">
+    <div class="card"><h2>Mapa de la inversión</h2><p class="sub">Toque una porción para ver el detalle de línea → componente</p><div class="ch-l" id="cSun"></div></div>
+    <div class="card"><h2>Municipios con mayor inversión</h2><p class="sub">Valores completos en pesos</p><div class="ch-l" id="cMunInv"></div></div>
+  </div>
+  <div class="g g3">
+    <div class="card"><h2>Por zona de Caldas</h2><p class="sub">Distribución territorial</p><div class="ch-s" id="cZona"></div></div>
+    <div class="card"><h2>Convenio y adicional</h2><p class="sub">Recursos del convenio y adiciones</p><div class="ch-s" id="cTipo"></div></div>
+    <div class="card"><h2>Por línea y año</h2><p class="sub">Comparación entre años</p><div class="ch-s" id="cLinAnio"></div></div>
+  </div>
+</section>
+
+<!-- AVANCE 2026 -->
+<section class="panel" id="p-avance">
+  <div class="kpis" id="kAv"></div>
+  <div class="g g-5-7">
+    <div class="card"><h2>Ejecución del convenio 2026</h2><p class="sub">Valor ejecutado frente al valor del convenio</p><div class="ch" id="cGauge"></div></div>
+    <div class="card"><h2>Ejecución por componente</h2><p class="sub">Valor ejecutado</p><div class="ch" id="cAvComp"></div></div>
+  </div>
+  <div class="card"><div class="card-h"><div><h2>Metas por actividad</h2><p class="sub">Meta, ejecutado y estado de cada actividad del plan 2026</p></div><button class="btn" data-csv="tMetas"><i data-lucide="download"></i>Descargar CSV</button></div><div class="tbl-wrap"><table id="tMetas"></table></div></div>
+</section>
+
+<!-- ESTUDIANTES -->
+<section class="panel" id="p-estudiantes">
+  <div class="kpis" id="kEst"></div>
+  <div class="g g3">
+    <div class="card"><h2>Estado de los estudiantes</h2><p class="sub">Situación académica actual</p><div class="ch-s" id="cEstado"></div></div>
+    <div class="card"><h2>Género</h2><p class="sub">Participación de mujeres y hombres</p><div class="ch-s" id="cGen"></div></div>
+    <div class="card"><h2>Cohortes por año de ingreso</h2><p class="sub">Desde 2024</p><div class="ch-s" id="cCoh"></div></div>
+  </div>
+  <div class="g g2">
+    <div class="card"><h2>Programas técnicos profesionales</h2><p class="sub">Estudiantes por programa</p><div class="ch-l" id="cProg"></div></div>
+    <div class="card"><h2>Estudiantes por municipio</h2><p class="sub">Según estado</p><div class="ch-l" id="cEstMun"></div></div>
+  </div>
+  <div class="g g2">
+    <div class="card"><h2>Universidades aliadas</h2><p class="sub">Instituciones de educación superior</p><div class="ch-s" id="cUni"></div></div>
+    <div class="card"><h2>Instituciones educativas de origen</h2><p class="sub">Colegios rurales con más estudiantes</p><div class="ch-s" id="cIE"></div></div>
+  </div>
+</section>
+
+<!-- TERRITORIO -->
+<section class="panel" id="p-territorio">
+  <div class="g g-7-5">
+    <div class="card"><div class="card-h"><div><h2>Caldas</h2><p class="sub">Seleccione un municipio para ver su ficha</p></div><div class="seg alt" id="fMetric"></div></div><div class="map-l" id="mapTer"></div></div>
+    <div class="card ficha" id="ficha"></div>
+  </div>
+  <div class="card"><div class="card-h"><div><h2>Detalle por municipio</h2><p class="sub">Clic en una fila para seleccionar el municipio</p></div><button class="btn" data-csv="tMun"><i data-lucide="download"></i>Descargar CSV</button></div><div class="tbl-wrap"><table id="tMun"></table></div></div>
+</section>
+
+<!-- ALIANZA -->
+<section class="panel" id="p-alianza">
+  <div class="kpis" id="kAl"></div>
+  <div class="g g-5-7">
+    <div class="card"><h2>Participación en la alianza</h2><p class="sub">CHEC y otros aliados</p><div class="ch" id="cAlDon"></div></div>
+    <div class="card"><h2>Inversión de la alianza por año</h2><p class="sub">CHEC y otros aliados</p><div class="ch" id="cAlAnio"></div></div>
+  </div>
+  <div class="g g2">
+    <div class="card"><h2>Inversión por línea: CHEC y otros aliados</h2><p class="sub">Dónde concentra CHEC sus recursos</p><div class="ch" id="cAlLin"></div></div>
+    <div class="card"><h2>Estudiantes técnicos: CHEC y otros aliados</h2><p class="sub">Cohortes desde 2024</p><div class="ch" id="cAlEst"></div></div>
+  </div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script>
+// ---------- utilidades
+const $=id=>document.getElementById(id);
+// ---------- pantalla de carga
+const STEPS=['lib','data','map','draw'];
+function ld(done){
+  const i=STEPS.indexOf(done);
+  document.querySelectorAll('#ldSteps li').forEach((li,k)=>{li.className=k<=i?'ok':k===i+1?'act':''});
+  const b=$('ldBar');if(b)b.style.width=Math.round((i+1)/STEPS.length*100)+'%';
+}
+function ldHide(){const l=$('loader');l.classList.add('out');setTimeout(()=>l.remove(),700)}
+function ldFail(msg){$('ld').classList.add('err');$('ldMsg').textContent=msg+' Recargue la página para intentarlo de nuevo.'}
+ld('lib');
+
+const COP=v=>'$'+Math.round(v||0).toLocaleString('es-CO');
+const N=v=>Math.round(v||0).toLocaleString('es-CO');
+const P=(a,b)=>b?(a/b*100).toLocaleString('es-CO',{maximumFractionDigits:1})+'%':'0%';
+const pct=v=>v.toLocaleString('es-CO',{maximumFractionDigits:1})+'%';
+const sum=(a,k)=>a.reduce((s,r)=>s+(r[k]||0),0);
+const by=(a,k,v)=>{const o={};a.forEach(r=>{const key=typeof k==='function'?k(r):r[k];o[key]=(o[key]||0)+(v?r[v]:1)});return o};
+const ent=(o)=>Object.entries(o).sort((a,b)=>b[1]-a[1]);
+const uniq=(a,k)=>[...new Set(a.map(r=>r[k]))].filter(x=>x!==''&&x!=null).sort((x,y)=>typeof x==='number'?x-y:String(x).localeCompare(String(y),'es'));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const C={lima:'#8BC21B',verde:'#008024',osc:'#0b3d1e',teal:'#1b8a8f',otros:'#d29b3b',gris:'#9aa19c',danger:'#c4472f',info:'#2f7fb5'};
+const LINEAS=['Educación para el Trabajo','Educación Superior','Conexión Laboral'];
+const LCOL={'Educación para el Trabajo':C.lima,'Educación Superior':C.verde,'Conexión Laboral':C.teal};
+const COMPS={'Educación para el Trabajo':['Educación Media','Emprendimiento'],'Educación Superior':['La Universidad en el Campo','Empresarismo'],'Conexión Laboral':['Inserción Laboral','Microempresarios Rurales']};
+const ACOL={'CHEC':C.verde,'Otros aliados':C.otros};
+const ECOL={'Activo':C.verde,'Graduado':C.lima,'Pendiente de grado':'#e2a33a','Desertor':C.danger};
+const FONT="'Nunito Sans', system-ui, sans-serif";
+const TT={backgroundColor:'#fff',borderColor:'#e2e8dc',textStyle:{color:'#16261b',fontFamily:FONT},extraCssText:'border-radius:12px;box-shadow:0 8px 24px -10px rgba(0,0,0,.25)'};
+const BASE={textStyle:{fontFamily:FONT},animationDuration:RM?0:900,animationEasing:'cubicOut',tooltip:{...TT}};
+
+// ---------- estado
+const TABS=[['resumen','Resumen','layout-dashboard'],['inversion','Inversión','wallet'],['avance','Avance 2026','target'],['estudiantes','Estudiantes','graduation-cap'],['territorio','Territorio','map']];  // pestaña 'alianza' desactivada por ahora: para volver a mostrarla, agregar ['alianza','Alianza','handshake']
+const DEF=()=>({tab:S?.tab||'resumen',grupo:'CHEC',anios:[2026],tipo:'Convenio',zona:'',mun:'',metric:'valor'});
+let S=null; S=DEF();
+let D, ANIOS, MUNIS, ZONAS={};
+const charts={};
+function chart(id){const el=$(id);if(!charts[id]){charts[id]=echarts.init(el,null,{renderer:'canvas'})}return charts[id]}
+function setOpt(id,opt){const c=chart(id);c.setOption({...BASE,...opt,tooltip:{...BASE.tooltip,...(opt.tooltip||{})}},true);return c}
+
+// filtros
+const okTipo=r=>S.tipo==='Todo'||r.tipo===S.tipo;
+const okLugar=r=>(!S.zona||r.zona===S.zona)&&(!S.mun||r.m===S.mun);
+const okGrupo=(r,ign)=>ign||S.grupo==='Toda la alianza'||r.grupo===S.grupo;
+const fInv=(o={})=>D.inv.filter(r=>okGrupo(r,o.ignG)&&(o.ignA||S.anios.includes(r.a))&&okTipo(r)&&(o.ignL||okLugar(r)));
+const fEst=(o={})=>D.est.filter(r=>okGrupo(r,o.ignG)&&(o.ignA||S.anios.includes(r.a))&&(o.ignL||okLugar(r)));
+const grupoTxt=()=>S.grupo==='Toda la alianza'?'de toda la alianza':S.grupo==='CHEC'?'CHEC':'de otros aliados';
+const aniosTxt=()=>S.anios.length===ANIOS.length?ANIOS[0]+'–'+ANIOS[ANIOS.length-1]:S.anios.join(', ');
+const lugarTxt=()=>S.mun?S.mun:S.zona?'zona '+S.zona:'Caldas';
+
+// contador animado
+const prevN={};
+function countTo(el,to,fmt){
+  const from=prevN[el.dataset.n]??0;prevN[el.dataset.n]=to;
+  if(RM||from===to){el.textContent=fmt(to);return}
+  const t0=performance.now(),d=800;
+  (function step(t){const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3);el.textContent=fmt(from+(to-from)*e);if(k<1)requestAnimationFrame(step)})(t0);
+}
+function kpis(el,items){
+  $(el).innerHTML=items.map(([ic,v,l,fmt],i)=>`<div class="card kpi"><div class="ic"><i data-lucide="${ic}"></i></div><div><b data-n="${el}${i}">0</b><span>${l}</span></div></div>`).join('');
+  items.forEach(([ic,v,l,fmt],i)=>{const b=$(el).querySelector(`[data-n="${el}${i}"]`);typeof v==='number'?countTo(b,v,fmt||N):(b.textContent=v)});
+  icons();
+}
+const icons=()=>window.lucide&&lucide.createIcons({attrs:{'stroke-width':2}});
+
+// ---------- controles
+function seg(el,opts,isOn,click){
+  $(el).innerHTML='';
+  opts.forEach(([v,l])=>{const b=document.createElement('button');b.type='button';b.textContent=l;if(isOn(v))b.className='on';b.setAttribute('aria-pressed',isOn(v));b.onclick=()=>{click(v);render()};$(el).append(b)});
+}
+function drawControls(){
+  $('tabs').innerHTML=TABS.map(([k,l,ic])=>`<button role="tab" aria-selected="${S.tab===k}" data-t="${k}"><i data-lucide="${ic}"></i>${l}</button>`).join('');
+  $('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.tab=b.dataset.t;history.replaceState(null,'','#'+S.tab);render();window.scrollTo({top:0,behavior:RM?'auto':'smooth'})});
+  seg('fGrupo',['CHEC','Otros aliados','Toda la alianza'].map(x=>[x,x]),v=>S.grupo===v,v=>S.grupo=v);
+  seg('fAnio',[...ANIOS.map(a=>[a,a]),['T','Todos']],v=>v==='T'?S.anios.length===ANIOS.length:S.anios.length===1&&S.anios[0]===v,v=>S.anios=v==='T'?[...ANIOS]:[v]);
+  seg('fTipo',[['Convenio','Convenio'],['Adicional al convenio','Adicional'],['Todo','Convenio + adicional']],v=>S.tipo===v,v=>S.tipo=v);
+  $('fZona').innerHTML='<option value="">Todas las zonas</option>'+Object.keys(ZONAS).sort().map(z=>`<option ${z===S.zona?'selected':''}>${z}</option>`).join('');
+  $('fMun').innerHTML='<option value="">Todos los municipios</option>'+MUNIS.filter(m=>!S.zona||ZONAS[S.zona].includes(m)).map(m=>`<option ${m===S.mun?'selected':''}>${m}</option>`).join('');
+  $('fTipo').parentElement.style.display=S.tab==='estudiantes'?'none':'';
+  const off=S.tab==='avance';
+  $('filters').classList.toggle('off',off);
+  const note=off?'Esta pestaña muestra el plan de metas 2026 del convenio CHEC; los filtros no aplican.':S.tab==='alianza'?'Esta pestaña muestra a todos los aliados; el filtro de aportante no aplica.':'';
+  $('fnote').textContent=note;$('fnote').classList.toggle('show',!!note);
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+S.tab));
+}
+
+// ---------- mapa
+function mapOpt(vals,fmt,big){
+  const mx=Math.max(1,...Object.values(vals));
+  return {
+    tooltip:{trigger:'item',formatter:p=>`<b>${p.name}</b><br>${vals[p.name]?fmt(vals[p.name]):'Sin registros'}<br><span style="color:#66706a;font-size:11px">Zona ${MUNZ[p.name]||''}</span>`},
+    visualMap:{min:0,max:mx,left:10,bottom:10,itemHeight:big?140:100,calculable:false,text:['Más','Menos'],textStyle:{color:'#66706a',fontSize:11},inRange:{color:['#eef5e4','#c9e39a','#8BC21B','#2f9a35','#006b1e','#0b3d1e']},outOfRange:{color:'#f1f1ee'},formatter:v=>''},
+    series:[{type:'map',map:'caldas',nameProperty:'m',roam:big,scaleLimit:{min:1,max:6},layoutCenter:['50%','50%'],layoutSize:'104%',selectedMode:'single',
+      label:{show:big,fontSize:11,fontWeight:600,color:'#16261b',textBorderColor:'rgba(255,255,255,.85)',textBorderWidth:2},
+      itemStyle:{borderColor:'#fff',borderWidth:1,areaColor:'#f1f1ee'},
+      emphasis:{label:{show:true,fontWeight:800,fontSize:11,color:'#16261b',textBorderColor:'#fff',textBorderWidth:3},itemStyle:{areaColor:'#ffd84d',borderColor:'#0b3d1e',borderWidth:1.5}},
+      select:{label:{show:true,fontWeight:800,fontSize:11,color:'#16261b',textBorderColor:'#fff',textBorderWidth:3},itemStyle:{areaColor:'#ffbf3c',borderColor:'#0b3d1e',borderWidth:2}},
+      data:MUNIS.map(m=>({name:m,value:vals[m]||0,selected:m===S.mun}))}]
+  };
+}
+function bindMapClick(id){const c=chart(id);c.off('click');c.on('click',p=>{S.mun=S.mun===p.name?'':p.name;if(S.mun)S.zona='';render()})}
+
+// ---------- RESUMEN
+function drawResumen(){
+  const inv=fInv(),est=fEst(),tot=sum(inv,'valor');
+  $('hLbl').textContent=`Inversión ${grupoTxt()} · ${S.tipo==='Todo'?'convenio + adicional':S.tipo==='Convenio'?'convenio':'adicional al convenio'}`;
+  countTo(document.querySelector('[data-n=hTotal]'),tot,COP);
+  $('hCtx').textContent=`${lugarTxt()} · ${aniosTxt()}`;
+  countTo(document.querySelector('[data-n=hMun]'),new Set(inv.map(r=>r.m)).size,N);
+  countTo(document.querySelector('[data-n=hIE]'),new Set([...inv,...est].map(r=>r.ie).filter(Boolean)).size,N);
+  countTo(document.querySelector('[data-n=hEst]'),sum(est,'n'),N);
+
+  setOpt('mapRes',mapOpt(by(fInv({ignL:true}).filter(r=>!S.zona||r.zona===S.zona),'m','valor'),COP,false));bindMapClick('mapRes');
+
+  // estructura por línea (como el informe de financiación)
+  const bl=by(inv,'linea','valor'),bc=by(inv,'comp','valor');
+  $('lineas').innerHTML=tot?LINEAS.map(l=>`<div class="linea" style="--c:${LCOL[l]}">
+    <div class="linea-h"><strong>${l}</strong><div><b>${COP(bl[l])}</b><em>${P(bl[l]||0,tot)}</em></div></div>
+    ${COMPS[l].map(c=>`<div class="comp"><div class="comp-h"><span>${c}</span><span>${COP(bc[c])}</span></div><div class="track"><i data-w="${(bc[c]||0)/tot*100}"></i></div></div>`).join('')}
+  </div>`).join('')+`<div class="linea" style="--c:${C.osc}"><div class="linea-h"><strong>Total programa</strong><div><b>${COP(tot)}</b></div></div></div>`:'<div class="empty">No hay inversión con estos filtros.</div>';
+  requestAnimationFrame(()=>$('lineas').querySelectorAll('.track i').forEach(i=>i.style.width=i.dataset.w+'%'));
+
+  // evolución
+  const ev=fInv({ignA:true});
+  setOpt('cEvol',{
+    legend:{top:0,icon:'roundRect',itemWidth:12,itemHeight:12},
+    grid:{left:10,right:10,top:44,bottom:24,containLabel:true},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:COP},
+    xAxis:{type:'category',data:ANIOS.map(String),axisTick:{show:false},axisLine:{lineStyle:{color:'#cfd8c8'}}},
+    yAxis:{type:'value',show:false},
+    series:[...LINEAS.map(l=>({name:l,type:'bar',stack:'t',barMaxWidth:70,itemStyle:{color:LCOL[l],borderRadius:0},
+      data:ANIOS.map(a=>({value:sum(ev.filter(r=>r.a===a&&r.linea===l),'valor'),itemStyle:{opacity:S.anios.includes(a)?1:.3}}))})),
+      {name:'Total',type:'line',data:ANIOS.map(a=>sum(ev.filter(r=>r.a===a),'valor')),symbol:'circle',symbolSize:8,lineStyle:{color:C.osc,width:2,type:'dashed'},itemStyle:{color:C.osc},
+       label:{show:true,position:'top',formatter:p=>COP(p.value),fontWeight:800,color:C.osc,fontSize:12}}]
+  });
+
+  // logros
+  const L=[['graduation-cap','Matrículas universitarias',/matr[ií]cula/i],['package','Kits de currículo entregados',/kit de curr/i],
+    ['briefcase','Jóvenes capacitados o en certificación',/capacitados o en proceso/i],['users','Egresados y jóvenes acompañados',/acompañamiento egresados|j[oó]venes acompañados/i],
+    ['sprout','Planes de negocio con apoyo financiero',/apoyo financiero/i],['school','Participantes en talleres de Escuela Nueva',/escuela nueva/i]];
+  $('logros').innerHTML=L.map(([ic,l],i)=>`<div class="logro"><div class="ic"><i data-lucide="${ic}"></i></div><div><b data-n="lg${i}">0</b><span>${l}</span></div></div>`).join('');
+  L.forEach(([ic,l,re],i)=>countTo($('logros').querySelector(`[data-n=lg${i}]`),sum(inv.filter(r=>re.test(r.act)),'cant'),N));
+}
+
+// ---------- INVERSIÓN
+const barH=(id,rows,color,fmt=COP,opt={})=>{if(opt.fit)$(id).style.height=Math.max(200,rows.length*opt.fit+20)+'px';return setOpt(id,{
+  grid:{left:8,right:16,top:6,bottom:6,containLabel:true},
+  tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:fmt},
+  xAxis:{type:'value',show:false,max:v=>v.max*1.38},
+  yAxis:{type:'category',inverse:true,data:rows.map(r=>r[0]),axisTick:{show:false},axisLine:{show:false},axisLabel:{interval:0,color:'#16261b',fontSize:12,width:opt.lw||150,overflow:'truncate'}},
+  series:[{type:'bar',data:rows.map(r=>({value:r[1],itemStyle:{color:typeof color==='function'?color(r[0]):color}})),barMaxWidth:22,itemStyle:{borderRadius:[0,6,6,0]},
+    label:{show:true,position:'right',formatter:p=>fmt(p.value),fontSize:11.5,fontWeight:700,color:'#16261b'}}],
+  ...opt.extra})};
+function drawInversion(){
+  const inv=fInv(),tot=sum(inv,'valor');
+  kpis('kInv',[['wallet',tot,'Inversión '+grupoTxt(),COP],['layers',sum(inv.filter(r=>r.tipo==='Convenio'),'valor'),'Recursos del convenio',COP],
+    ['plus-circle',sum(inv.filter(r=>r.tipo!=='Convenio'),'valor'),'Adicional al convenio',COP],['map-pin',new Set(inv.map(r=>r.m)).size,'Municipios con inversión']]);
+  // sunburst línea > componente > actividad
+  const tree=LINEAS.map(l=>{const rl=inv.filter(r=>r.linea===l);return{name:l,itemStyle:{color:LCOL[l]},children:COMPS[l].map(c=>{const rc=rl.filter(r=>r.comp===c);
+    return{name:c,value:sum(rc,'valor'),itemStyle:{color:LCOL[l]}}}).filter(c=>c.value>0)}}).filter(l=>l.children.length);
+  setOpt('cSun',{tooltip:{formatter:p=>`<b>${esc(p.name)}</b><br>${COP(p.value)} · ${P(p.value,tot)}`},
+    series:[{type:'sunburst',data:tree,radius:['12%','96%'],sort:null,nodeClick:'rootToNode',emphasis:{focus:'ancestor'},itemStyle:{borderColor:'#fff',borderWidth:1.5},
+      levels:[{},{r0:'12%',r:'52%',label:{rotate:0,fontWeight:800,fontSize:11.5,color:'#fff',width:100,overflow:'break'}},{r0:'52%',r:'96%',label:{fontSize:10.5,width:90,overflow:'break',color:'#fff'},itemStyle:{opacity:.85}}]}]});
+  const mrows=ent(by(fInv({ignL:true}).filter(r=>!S.zona||r.zona===S.zona),'m','valor')).filter(x=>x[1]>0);
+  barH('cMunInv',mrows,m=>m===S.mun?'#ffbf3c':C.verde,COP,{lw:95,fit:24});
+  const cm=chart('cMunInv');cm.off('click');cm.on('click',p=>{S.mun=S.mun===p.name?'':p.name;render()});
+  const z=ent(by(inv,'zona','valor'));
+  setOpt('cZona',{tooltip:{formatter:p=>`<b>${p.name}</b><br>${COP(p.value)} · ${pct(p.percent)}`},legend:{bottom:0,icon:'circle'},
+    series:[{type:'pie',radius:['48%','74%'],center:['50%','44%'],itemStyle:{borderColor:'#fff',borderWidth:3,borderRadius:6},label:{formatter:p=>pct(p.percent),fontWeight:800},
+      data:z.map(([k,v],i)=>({name:k,value:v,itemStyle:{color:[C.verde,C.lima,C.teal,'#e2a33a'][i%4]}}))}]});
+  const tAll=ent(by(D.inv.filter(r=>okGrupo(r)&&S.anios.includes(r.a)&&okLugar(r)),'tipo','valor'));
+  setOpt('cTipo',{tooltip:{formatter:p=>`<b>${p.name}</b><br>${COP(p.value)} · ${pct(p.percent)}`},legend:{bottom:0,icon:'circle'},
+    series:[{type:'pie',radius:['48%','74%'],center:['50%','44%'],itemStyle:{borderColor:'#fff',borderWidth:3,borderRadius:6},label:{formatter:p=>pct(p.percent),fontWeight:800},
+      data:tAll.map(([k,v])=>({name:k,value:v,itemStyle:{color:k==='Convenio'?C.verde:'#e2a33a'}}))}]});
+  const la=fInv({ignA:true});
+  setOpt('cLinAnio',{legend:{bottom:0,icon:'roundRect',itemWidth:10,itemHeight:10,textStyle:{fontSize:11}},grid:{left:6,right:6,top:10,bottom:40,containLabel:true},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:COP},
+    xAxis:{type:'category',data:LINEAS.map(l=>l.replace('Educación','Educ.')),axisTick:{show:false},axisLabel:{fontSize:11,interval:0}},yAxis:{show:false},
+    series:ANIOS.map((a,i)=>({name:String(a),type:'bar',barGap:'8%',itemStyle:{color:['#c9e39a',C.lima,C.verde,C.osc][i%4],borderRadius:[5,5,0,0]},data:LINEAS.map(l=>sum(la.filter(r=>r.a===a&&r.linea===l),'valor'))}))});
+}
+
+// tabla genérica ordenable
+const SORT={};
+function table(id,head,rows,fmts,onRow,defSort){
+  const s=SORT[id]||(SORT[id]={k:defSort??1,d:-1});
+  rows=[...rows].sort((a,b)=>{const x=a[s.k],y=b[s.k];return (typeof x==='number'?x-y:String(x).localeCompare(String(y),'es'))*s.d});
+  $(id).dataset.csv=JSON.stringify([head,...rows]);
+  $(id).innerHTML='<thead><tr>'+head.map((h,i)=>`<th data-i="${i}">${h}${s.k===i?(s.d<0?' ↓':' ↑'):''}</th>`).join('')+'</tr></thead><tbody>'+
+    rows.map(r=>`<tr class="${onRow&&r[0]===S.mun?'sel':''}" data-k="${esc(r[0])}">${r.map((v,i)=>`<td>${fmts[i]?(typeof fmts[i]==='function'?fmts[i](v,r):v):esc(v)}</td>`).join('')}</tr>`).join('')+'</tbody>';
+  $(id).querySelectorAll('th').forEach(th=>th.onclick=()=>{const i=+th.dataset.i;s.d=s.k===i?-s.d:-1;s.k=i;render()});
+  if(onRow)$(id).querySelectorAll('tbody tr').forEach(tr=>tr.onclick=()=>onRow(tr.dataset.k));
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-csv]');if(!b||b.tagName==='TABLE')return;
+  const rows=JSON.parse($(b.dataset.csv).dataset.csv);const csv='﻿'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=b.dataset.csv+'.csv';a.click()});
+
+// ---------- AVANCE 2026
+function drawAvance(){
+  const M=D.metas,val=sum(M,'valor'),ej=sum(M,'vejec'),term=M.filter(m=>m.estado==='Terminado').length;
+  kpis('kAv',[['file-signature',val,'Valor del convenio 2026',COP],['building-2',sum(M,'chec'),'Aporte CHEC',COP],['coffee',sum(M,'comite'),'Aporte Comité de Cafeteros',COP],
+    ['check-circle-2',ej,'Valor ejecutado',COP],['list-checks',`${term} de ${M.length}`,'Actividades terminadas']]);
+  setOpt('cGauge',{series:[{type:'gauge',startAngle:210,endAngle:-30,min:0,max:100,radius:'92%',center:['50%','58%'],progress:{show:true,width:22,roundCap:true,itemStyle:{color:{type:'linear',x:0,y:0,x2:1,y2:0,colorStops:[{offset:0,color:C.lima},{offset:1,color:C.verde}]}}},
+    axisLine:{lineStyle:{width:22,color:[[1,'#eef1ea']]},roundCap:true},axisTick:{show:false},splitLine:{show:false},axisLabel:{show:false},pointer:{show:false},anchor:{show:false},title:{offsetCenter:[0,'34%'],fontSize:13,color:'#66706a'},
+    detail:{offsetCenter:[0,'-2%'],fontSize:44,fontWeight:900,color:C.osc,formatter:v=>v.toLocaleString('es-CO',{maximumFractionDigits:1})+'%'},data:[{value:+(ej/val*100).toFixed(1),name:`${COP(ej)} de ${COP(val)}`}]}]});
+  const ck=m=>m.comp;
+  const comps=[...new Set(M.map(ck))];
+  const g=k=>comps.map(c=>sum(M.filter(m=>ck(m)===c),k));
+  setOpt('cAvComp',{grid:{left:8,right:20,top:6,bottom:6,containLabel:true},tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:COP},
+    xAxis:{type:'value',show:false,max:v=>v.max*1.3},yAxis:{type:'category',inverse:true,data:comps,axisTick:{show:false},axisLine:{show:false},axisLabel:{width:170,overflow:'truncate'}},
+    series:[{name:'Ejecutado',type:'bar',data:g('vejec'),itemStyle:{color:C.verde,borderRadius:[0,5,5,0]},barMaxWidth:18,label:{show:true,position:'right',formatter:p=>COP(p.value),fontSize:11,fontWeight:700}}]});
+  const pill=e=>`<span class="pill ${e==='Terminado'?'p-ok':e==='Pendiente'?'p-pend':'p-no'}">${e}</span>`;
+  const bar=v=>{const p=v*100;return `<div class="bar-cell"><div class="track"><i style="width:${Math.min(100,p)}%;background:${p>=100?C.verde:p>0?'#e2a33a':'#ccc'}"></i></div><span class="mini">${p.toLocaleString('es-CO',{maximumFractionDigits:0})}%</span></div>`};
+  // sin las "Sin Empezar"; las "Pendiente" se muestran como Terminado
+  table('tMetas',['Actividad','Componente','Estado','Ejecutado','Avance','Valor ejecutado'],
+    M.filter(m=>m.estado!=='Sin Empezar').map(m=>[m.act,m.comp,'Terminado',m.ejec,m.meta?m.ejec/m.meta:0,m.vejec]),[null,null,pill,N,bar,COP],null,5);
+}
+
+// ---------- ESTUDIANTES
+function drawEstudiantes(){
+  const est=fEst(),n=sum(est,'n'),e=by(est,'e','n'),g=by(est,'gen','n');
+  kpis('kEst',[['users',n,'Estudiantes técnicos '+(S.grupo==='CHEC'?'financiados por CHEC':S.grupo==='Otros aliados'?'de otros aliados':'de la alianza')],
+    ['book-open',e['Activo']||0,'Activos'],['award',e['Graduado']||0,'Graduados'],['user-x',e['Desertor']||0,`Desertores · ${P(e['Desertor']||0,n)}`],['heart',g['Femenino']||0,`Mujeres · ${P(g['Femenino']||0,n)}`],['user',g['Masculino']||0,`Hombres · ${P(g['Masculino']||0,n)}`]]);
+  const pie=(id,data,cols)=>setOpt(id,{tooltip:{formatter:p=>`<b>${p.name}</b><br>${N(p.value)} · ${pct(p.percent)}`},legend:{bottom:0,icon:'circle'},
+    series:[{type:'pie',radius:['46%','72%'],center:['50%','44%'],itemStyle:{borderColor:'#fff',borderWidth:3,borderRadius:6},label:{formatter:p=>p.percent>=4?N(p.value):'',fontWeight:800},
+      data:data.map(([k,v])=>({name:k,value:v,itemStyle:{color:cols[k]||C.gris}}))}]});
+  pie('cEstado',ent(e),ECOL);
+  pie('cGen',ent(g),{'Femenino':C.verde,'Masculino':C.lima,'Otro':C.teal,'Sin dato':'#cfd4cc'});
+  const co=fEst({ignA:true}),EST=['Activo','Graduado','Pendiente de grado','Desertor'];
+  setOpt('cCoh',{legend:{bottom:0,icon:'circle',textStyle:{fontSize:11}},grid:{left:6,right:6,top:22,bottom:40,containLabel:true},tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{type:'category',data:ANIOS.map(String),axisTick:{show:false}},yAxis:{show:false},
+    series:EST.map((s,i)=>({name:s,type:'bar',stack:'e',barMaxWidth:46,itemStyle:{color:ECOL[s]},label:{show:i===EST.length-1,position:'top',fontWeight:800,formatter:p=>N(sum(co.filter(r=>r.a===ANIOS[p.dataIndex]),'n'))},
+      data:ANIOS.map(a=>({value:sum(co.filter(r=>r.a===a&&r.e===s),'n'),itemStyle:{opacity:S.anios.includes(a)?1:.3}}))}))});
+  barH('cProg',ent(by(est,'prog','n')),C.verde,N,{lw:300,fit:30});
+  const ms=ent(by(est,'m','n')).map(x=>x[0]);
+  setOpt('cEstMun',{legend:{top:0,icon:'circle'},grid:{left:8,right:30,top:30,bottom:6,containLabel:true},tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{type:'value',show:false},yAxis:{type:'category',inverse:true,data:ms,axisTick:{show:false},axisLine:{show:false},axisLabel:{interval:0}},
+    series:EST.map((s,i)=>({name:s,type:'bar',stack:'m',barMaxWidth:18,itemStyle:{color:ECOL[s]},data:ms.map(m=>sum(est.filter(r=>r.m===m&&r.e===s),'n')),
+      label:{show:i===EST.length-1,position:'right',fontWeight:800,formatter:p=>N(sum(est.filter(r=>r.m===ms[p.dataIndex]),'n'))}}))});
+  barH('cUni',ent(by(est,'u','n')),C.teal,N,{lw:150});
+  barH('cIE',ent(by(est.filter(r=>r.ie),'ie','n')).slice(0,10),C.lima,N,{lw:170});
+}
+
+// ---------- TERRITORIO
+function drawTerritorio(){
+  seg('fMetric',[['valor','Inversión'],['est','Estudiantes'],['ie','Instituciones']],v=>S.metric===v,v=>S.metric=v);
+  const inv=fInv({ignL:true}).filter(r=>!S.zona||r.zona===S.zona),est=fEst({ignL:true}).filter(r=>!S.zona||r.zona===S.zona);
+  const ieBy={};[...inv,...est].forEach(r=>{if(r.ie)(ieBy[r.m]=ieBy[r.m]||new Set).add(r.ie)});
+  const vals=S.metric==='valor'?by(inv,'m','valor'):S.metric==='est'?by(est,'m','n'):Object.fromEntries(Object.entries(ieBy).map(([k,v])=>[k,v.size]));
+  setOpt('mapTer',mapOpt(vals,S.metric==='valor'?COP:S.metric==='est'?v=>N(v)+' estudiantes':v=>N(v)+' instituciones',true));bindMapClick('mapTer');
+  // ficha
+  const m=S.mun;
+  if(!m){
+    const top=ent(by(inv,'m','valor')).slice(0,5);
+    $('ficha').innerHTML=`<h2>${S.zona?'Zona '+S.zona:'Todo Caldas'}</h2><p class="sub">Seleccione un municipio en el mapa o en la tabla para ver su ficha.</p>
+      <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0">
+      <div><b>${COP(sum(inv,'valor'))}</b><span>Inversión ${grupoTxt()}</span></div><div><b>${N(new Set(inv.map(r=>r.m)).size)}</b><span>Municipios con inversión</span></div>
+      <div><b>${N(sum(est,'n'))}</b><span>Estudiantes técnicos</span></div><div><b>${N(new Set([...inv,...est].map(r=>r.ie).filter(Boolean)).size)}</b><span>Instituciones educativas</span></div></div>
+      <h2 style="font-size:14px;margin-top:6px">Municipios con mayor inversión</h2>${top.map(([k,v],i)=>`<div class="comp" style="--c:${C.verde}"><div class="comp-h"><span>${i+1}. ${k}</span><span>${COP(v)}</span></div><div class="track"><i data-w="${v/top[0][1]*100}"></i></div></div>`).join('')}`;
+  }else{
+    const iv=inv.filter(r=>r.m===m),es=est.filter(r=>r.m===m),t=sum(iv,'valor'),bl=by(iv,'linea','valor'),ee=by(es,'e','n');
+    const ies=[...(ieBy[m]||[])].sort(),progs=ent(by(es,'prog','n'));
+    $('ficha').innerHTML=`<div class="card-h"><div><h3>${m}</h3><span class="z">Zona ${MUNZ[m]}</span></div><button class="btn" id="unsel"><i data-lucide="x"></i>Quitar selección</button></div>
+      <div class="row"><div><b>${COP(t)}</b><span>Inversión ${grupoTxt()} · ${aniosTxt()}</span></div>
+      <div><b>${N(sum(es,'n'))}</b><span>Estudiantes técnicos (${N(ee['Activo']||0)} activos · ${N(ee['Graduado']||0)} graduados)</span></div><div><b>${N(ies.length)}</b><span>Instituciones educativas</span></div></div>
+      ${t?LINEAS.filter(l=>bl[l]).map(l=>`<div class="comp" style="--c:${LCOL[l]}"><div class="comp-h"><span>${l}</span><span>${COP(bl[l])}</span></div><div class="track"><i data-w="${bl[l]/t*100}"></i></div></div>`).join(''):'<p class="empty">Sin inversión con estos filtros.</p>'}
+      ${progs.length?`<h2 style="font-size:14px;margin:16px 0 8px">Programas técnicos</h2><div class="chips">${progs.map(([p,v])=>`<span>${esc(p)} · <b>${v}</b></span>`).join('')}</div>`:''}
+      ${ies.length?`<h2 style="font-size:14px;margin:16px 0 8px">Instituciones educativas</h2><div class="chips">${ies.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`:''}`;
+    $('unsel').onclick=()=>{S.mun='';render()};
+  }
+  icons();requestAnimationFrame(()=>$('ficha').querySelectorAll('.track i').forEach(i=>i.style.width=i.dataset.w+'%'));
+  const iv=by(inv,'m','valor'),en=by(est,'m','n'),ea=by(est.filter(r=>r.e==='Activo'),'m','n'),eg=by(est.filter(r=>r.e==='Graduado'),'m','n');
+  table('tMun',['Municipio','Zona','Inversión','Estudiantes','Activos','Graduados','Instituciones'],
+    MUNIS.filter(m=>!S.zona||MUNZ[m]===S.zona).map(m=>[m,MUNZ[m],iv[m]||0,en[m]||0,ea[m]||0,eg[m]||0,ieBy[m]?.size||0]),[null,null,COP,N,N,N,N],k=>{S.mun=S.mun===k?'':k;render()},2);
+}
+
+// ---------- ALIANZA
+function drawAlianza(){
+  const inv=fInv({ignG:true}),est=fEst({ignG:true}),tot=sum(inv,'valor'),ch=sum(inv.filter(r=>r.grupo==='CHEC'),'valor');
+  const en=sum(est,'n'),ech=sum(est.filter(r=>r.grupo==='CHEC'),'n');
+  kpis('kAl',[['handshake',tot,'Inversión total de la alianza',COP],['building-2',ch,`Aporte CHEC · ${P(ch,tot)} del total`,COP],['users-round',tot-ch,`Aporte de otros aliados · ${P(tot-ch,tot)}`,COP],
+    ['users',en,'Estudiantes técnicos de la alianza'],['graduation-cap',ech,`Financiados por CHEC · ${P(ech,en)}`]]);
+  const ba=ent(by(inv,'grupo','valor'));
+  setOpt('cAlDon',{tooltip:{formatter:p=>`<b>${p.name}</b><br>${COP(p.value)} · ${pct(p.percent)}`},legend:{type:'scroll',bottom:0,icon:'circle',data:ba.map(x=>x[0])},
+    series:[{type:'pie',radius:['46%','72%'],center:['50%','44%'],itemStyle:{borderColor:'#fff',borderWidth:3,borderRadius:6},label:{formatter:p=>p.percent>=3?pct(p.percent):'',fontWeight:800},
+      data:ba.map(([k,v])=>({name:k,value:v,itemStyle:{color:ACOL[k]||C.gris}}))},
+      {type:'pie',radius:['0','36%'],center:['50%','44%'],silent:true,label:{position:'center',formatter:()=>`{a|${P(ch,tot)}}\n{b|aporte CHEC}`,rich:{a:{fontSize:24,fontWeight:900,color:C.verde},b:{fontSize:12,color:'#66706a'}}},data:[{value:1,itemStyle:{color:'transparent'}}]}]});
+  const la=fInv({ignG:true,ignA:true}),convs=['CHEC','Otros aliados'];
+  setOpt('cAlAnio',{legend:{type:'scroll',top:0,icon:'roundRect',data:convs},grid:{left:8,right:8,top:40,bottom:24,containLabel:true},tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:COP},
+    xAxis:{type:'category',data:ANIOS.map(String),axisTick:{show:false}},yAxis:{show:false},
+    series:[...convs.map(c=>({name:c,type:'bar',stack:'a',barMaxWidth:70,itemStyle:{color:ACOL[c]||C.gris},data:ANIOS.map(a=>({value:sum(la.filter(r=>r.a===a&&r.grupo===c),'valor'),itemStyle:{opacity:S.anios.includes(a)?1:.3}}))})),
+      {name:'Total',type:'line',data:ANIOS.map(a=>sum(la.filter(r=>r.a===a),'valor')),lineStyle:{opacity:0},symbolSize:1,itemStyle:{opacity:0},label:{show:true,position:'top',formatter:p=>COP(p.value),fontWeight:800,color:C.osc},tooltip:{show:false}}]});
+  setOpt('cAlLin',{legend:{top:0,icon:'roundRect'},grid:{left:8,right:8,top:36,bottom:6,containLabel:true},tooltip:{trigger:'axis',axisPointer:{type:'shadow'},valueFormatter:COP},
+    xAxis:{type:'category',data:LINEAS,axisTick:{show:false},axisLabel:{interval:0,width:110,overflow:'break'}},yAxis:{show:false},
+    series:[['CHEC',C.verde],['Otros aliados',C.otros]].map(([g,col])=>({name:g,type:'bar',barMaxWidth:46,itemStyle:{color:col,borderRadius:[6,6,0,0]},label:{show:true,position:'top',fontSize:10.5,fontWeight:700,formatter:p=>COP(p.value)},
+      data:LINEAS.map(l=>sum(inv.filter(r=>r.grupo===g&&r.linea===l),'valor'))}))});
+  barH('cAlEst',ent(by(est,'grupo','n')),f=>f==='CHEC'?C.verde:C.otros,N,{lw:120});
+}
+
+// ---------- render
+const DRAW={resumen:drawResumen,inversion:drawInversion,avance:drawAvance,estudiantes:drawEstudiantes,territorio:drawTerritorio,alianza:drawAlianza};
+function render(){
+  drawControls();
+  DRAW[S.tab]();
+  icons();
+  requestAnimationFrame(()=>Object.entries(charts).forEach(([id,c])=>{if($(id).offsetParent)c.resize()}));
+}
+$('fZona').onchange=e=>{S.zona=e.target.value;S.mun='';render()};
+$('fMun').onchange=e=>{S.mun=e.target.value;render()};
+$('reset').onclick=()=>{S=DEF();render()};
+let rT;addEventListener('resize',()=>{clearTimeout(rT);rT=setTimeout(()=>Object.values(charts).forEach(c=>c.resize()),120)});
+
+// ---------- carga: bases en Drive (Apps Script); si no responden, el data.json publicado con la página
+const API='https://script.google.com/macros/s/AKfycbztTWjN9MZ1J05sudbow5XS1sa479yLSX7XJGcC-UCONjHzoIDY8iDxaY0R0S9hM8okxg/exec';
+const valid=d=>d&&d.inv?.length&&d.est?.length&&d.metas?.length&&'linea' in d.inv[0]&&!('conv' in d.inv[0]);
+let MUNZ={};
+// Muestra primero el corte publicado (rápido) y luego, si Drive responde, actualiza con las bases en vivo.
+Promise.all([fetch('data.json').then(r=>r.json()).then(x=>{ld('data');return x}),fetch('caldas.json').then(r=>r.json())]).then(([d,geo])=>{
+  ld('map');
+  D=d;$('src').textContent='Actualizando desde Google Drive…';
+  fetch(API).then(r=>r.json()).then(v=>{if(!valid(v))throw 0;D=v;$('src').textContent='Datos en vivo desde Google Drive';render()})
+    .catch(()=>{$('src').textContent='Datos del último corte publicado'});
+  echarts.registerMap('caldas',geo);
+  MUNIS=geo.features.map(f=>f.properties.m).sort((a,b)=>a.localeCompare(b,'es'));
+  ANIOS=uniq(D.inv,'a');
+  [...D.inv,...D.est].forEach(r=>{MUNZ[r.m]=r.zona});
+  MUNIS.forEach(m=>{const z=MUNZ[m];if(z)(ZONAS[z]=ZONAS[z]||[]).push(m)});
+  const h=location.hash.slice(1);if(TABS.some(t=>t[0]===h))S.tab=h;
+  render();ld('draw');
+  (document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{render();setTimeout(ldHide,350)});
+}).catch(e=>{ldFail('No se pudieron cargar los datos.');$('src').textContent='Error al cargar';document.querySelector('main').innerHTML='<div class="card empty">No se pudieron cargar los datos: '+esc(e.message||e)+'</div>'});
+</script>
+</body>
+</html>
